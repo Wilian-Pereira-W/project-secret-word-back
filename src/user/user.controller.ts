@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -40,7 +41,6 @@ export class UserController {
     }
   }
 
-  @IsPublic()
   @Get('user')
   async findAll(@Res() res: Response) {
     const users = await this.userService.findAll();
@@ -49,10 +49,19 @@ export class UserController {
     }
     return res.status(200).json(users);
   }
+  @IsPublic()
+  @Get('user/ranking')
+  async findAllRanking(@Res() res: Response) {
+    try {
+      const usersRanking = await this.userService.findAllRanking();
+      if (!usersRanking) {
+        return res.status(400).json({ message: 'Não tem Ranking' });
+      }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+      return res.status(200).json(usersRanking);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   @Patch(':id')

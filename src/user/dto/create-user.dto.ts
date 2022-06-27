@@ -6,5 +6,5 @@ export class CreateUserDto implements Prisma.UserCreateInput {
   password: string;
   nick: string;
   role?: Role;
-  scores?: Prisma.ScoreCreateNestedManyWithoutUserInput;
+  scores?: Prisma.ScoreCreateNestedManyWithoutAuthorInput;
 }

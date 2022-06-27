@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import * as md5 from 'md5';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -41,6 +40,26 @@ export class UserService {
 
   findAll() {
     const users = this.prisma.user.findMany();
+    return users;
+  }
+
+  async findAllRanking() {
+    const users = await this.prisma.user.findMany({
+      select: {
+        name: true,
+        nick: true,
+        id: true,
+        scores: {
+          orderBy: {
+            score: 'desc',
+          },
+          select: {
+            difficulty: true,
+            score: true,
+          },
+        },
+      },
+    });
     return users;
   }
 
