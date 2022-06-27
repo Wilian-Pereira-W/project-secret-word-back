@@ -12,16 +12,17 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Response } from 'express';
+import { IsPublic } from '../auth/decorators/is-public.decorator';
 
-@Controller('user')
+@Controller()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
+  @IsPublic()
+  @Post('user/register')
   async create(@Res() res: Response, @Body() data: CreateUserDto) {
     try {
       const user = await this.userService.create(data);
-      console.log(user);
 
       if (user === 'Esse email já existe') {
         return res.status(409).json({ message: 'Esse email já existe' });
@@ -39,14 +40,14 @@ export class UserController {
     }
   }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
-
-  @Get()
-  findLogin(@Body() password: string, email: string) {
-    return this.userService.findLogin(password, email);
+  @IsPublic()
+  @Get('user')
+  async findAll(@Res() res: Response) {
+    const users = await this.userService.findAll();
+    if (users.length === 0) {
+      return res.status(400).json({ message: 'Não tem usuário' });
+    }
+    return res.status(200).json(users);
   }
 
   @Get(':id')

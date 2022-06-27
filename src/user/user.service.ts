@@ -3,13 +3,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as md5 from 'md5';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
-  async create(data: CreateUserDto) {
-    const { name, nick, password, email } = data;
-    const encryptedPass = md5(password);
+  async create(CreateUserDto: CreateUserDto) {
+    const { nick, password, email } = CreateUserDto;
 
     const emailExists = await this.prisma.user.findMany({
       where: {
@@ -27,15 +27,15 @@ export class UserService {
     if (nickExists.length !== 0) return 'Esse nick já existe';
 
     if (emailExists.length === 0 && nickExists.length === 0) {
-      const user = this.prisma.user.create({
-        data: {
-          name,
-          email,
-          password: encryptedPass,
-          nick,
-        },
-      });
-      return user;
+      const data = {
+        ...CreateUserDto,
+        password: await bcrypt.hash(password, 10),
+      };
+      const createdUser = await this.prisma.user.create({ data });
+      return {
+        ...createdUser,
+        password: undefined,
+      };
     }
   }
 
@@ -44,14 +44,10 @@ export class UserService {
     return users;
   }
 
-  findLogin(password: string, email: string) {
-    const user = this.prisma.user.findMany({
-      where: {
-        email,
-      },
+  findByEmail(email: string) {
+    return this.prisma.user.findUnique({
+      where: { email },
     });
-    console.log(user);
-    return user;
   }
 
   findOne(id: number) {
