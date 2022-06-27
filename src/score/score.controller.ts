@@ -1,15 +1,35 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Res,
+} from '@nestjs/common';
 import { ScoreService } from './score.service';
 import { CreateScoreDto } from './dto/create-score.dto';
 import { UpdateScoreDto } from './dto/update-score.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Response } from 'express';
 
-@Controller('score')
+@UseGuards(AuthGuard('jwt'))
+@Controller()
 export class ScoreController {
   constructor(private readonly scoreService: ScoreService) {}
 
-  @Post()
-  create(@Body() createScoreDto: CreateScoreDto) {
-    return this.scoreService.create(createScoreDto);
+  @Post('score')
+  create(@Res() res: Response, @Body() createScoreDto: CreateScoreDto) {
+    try {
+      const score = this.scoreService.create(createScoreDto);
+      if (score) {
+        return res.status(200).json(score);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   @Get()

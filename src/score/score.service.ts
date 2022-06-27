@@ -7,8 +7,12 @@ import { UpdateScoreDto } from './dto/update-score.dto';
 export class ScoreService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(createScoreDto: CreateScoreDto) {
-    return 'This action adds a new score';
+  async create(createScoreDto: CreateScoreDto) {
+    console.log(createScoreDto);
+    const createdScore = await this.prisma.score.create({
+      data: { ...createScoreDto },
+    });
+    return createdScore;
   }
 
   findAll() {
