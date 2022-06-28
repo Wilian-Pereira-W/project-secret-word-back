@@ -49,8 +49,7 @@ export class UserController {
     }
     return res.status(200).json(users);
   }
-  @IsPublic()
-  @Get('user/ranking')
+  @Get('ranking')
   async findAllRanking(@Res() res: Response) {
     try {
       const usersRanking = await this.userService.findAllRanking();
